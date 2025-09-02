@@ -63,10 +63,11 @@ What it does:
 3. Writing the resolved URL back to the dataset
 
 INPUT file:
-1. VP_cleaned.csv from 2_Name_Match.py
+1. VP_cleaned.csv from
+2. Name_Match.py
 
 OUTPUT file:
-2. VP_website_filled.csv
+1. VP_website_filled.csv
 ----------------------
 ### 4_Category_Specialization.py
 =================================
