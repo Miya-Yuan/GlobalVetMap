@@ -1,11 +1,11 @@
-import pandas as pd
+limport pandas as pd
 import requests
 import time
 import os
 
 # === CONFIGURATION ===
 BASE_DIR = r"C:\Users\myuan\Desktop\VetMap_Data"   # root folder with ISO subfolders
-USER_AGENT = "MyGeocoderScript/1.0 (mingyangy656@gmail.com)"  # required by Nominatim
+USER_AGENT = "MyGeocoderScript/1.0 (Email Address)"  # required by Nominatim
 SLEEP_SECONDS = 1  # Nominatim limit = 1 request/sec
 
 # === REVERSE GEOCODING ===
@@ -64,3 +64,4 @@ def process_all():
 
 if __name__ == "__main__":
     process_all()
+
