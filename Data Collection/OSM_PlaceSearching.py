@@ -8,7 +8,8 @@ import requests
 import random
 
 # === CONFIGURATION ===
-USER_AGENT = "MyGeocoderScript/1.0 (Email Address)"
+load_dotenv()
+USER_AGENT = os.getenv("OSM_USER_AGENT")
 COUNTRY_DIR = "VUT"
 BASE_DIR = "C:/Users/myuan/Desktop/VetMap_Data"
 SHP_DIR = "C:/Users/myuan/Desktop/Data/shapefile/country"
@@ -173,4 +174,5 @@ def OSM_Place():
 
 if __name__ == "__main__":
     OSM_Place()
+
 
