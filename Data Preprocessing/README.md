@@ -199,3 +199,8 @@ The blacklist includes domain patterns associated with:
 4. Content platforms, personal blogs, or generic profiles: (e.g. wordpress.com, blogspot.com, about.me, tumblr.com)
 5. Review/appointment aggregators and lead gen tools: (e.g. trustpilot.com, healthgrades.com, zocdoc.com)
 These domains are not acceptable as authoritative veterinary websites in data collection or classification pipelines.
+----------------------
+### cookie/service/team_config.py
+=================================
+
+These lists are used to (fuzzy) match the words/texts in the website, to dismiss the cookie banner, detect service page or team page for further data extraction. Each list contains keywords in different languages to satisfy the main languages using in a specific webpage. In theory, the language used by the website will be detected, and the targeted kexwords for that language will be used for the following detection. If no languages detected, the default languages is English. 
