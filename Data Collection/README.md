@@ -74,7 +74,7 @@ OUTPUT file:
 ====================================================
 
 Overview:
-This script use OpenStreetMap to extract veterinary practices in any country, the data is stored as a pbf file that can be downloaded from (Geofabrik)[https://download.geofabrik.de/]
+This script use OpenStreetMap to extract veterinary practices in any country, the data is stored as a pbf file that can be downloaded from [Geofabrik](https://download.geofabrik.de/)
 1. Either download files for each country, or for continent and separate each country using the shapefile of their boundaries
 2. Only extract data using 'amenity=veterinary'
 
