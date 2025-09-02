@@ -1,5 +1,6 @@
 ### GooglePlaceSearch.py
 ====================================================
+
 Overview:
 This script use Google Place API to extract veterinary practices in any country
 1. Loads the country's shapefile
@@ -8,7 +9,7 @@ This script use Google Place API to extract veterinary practices in any country
     (type='veterinary_care' is used to filter the properties that are related to veterinary practice)
 4. Collects names, address, location, business status, types and website
 5. Save practices separately based on the business status, operational or closed. The closed ones are saved for deduplication in the next steps. 
---------------------
+
 This script scrape vet pratice as much as possible because:
 1. Grid-based search using actual country borders
     It generates points only within the selected country, based on the shapefile
@@ -25,9 +26,10 @@ This script scrape vet pratice as much as possible because:
 OUTPUT file:
 1. VP_GM.csv that contain all operational practices
 2. VP_GM_dedup.csv contain all closed practices
-====================================================
+--------------------
 ### OSM_PlaceSearch.py
 ====================================================
+
 Overview:
 This script use OpenStreetMap to extract veterinary practices in any country
 1. Uses a country shapefile to generate a grid of points
