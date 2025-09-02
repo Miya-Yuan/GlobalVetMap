@@ -23,9 +23,36 @@ This script scrape vet pratice as much as possible because:
     The script handles next_page_token to fetch up to 60 results per location (3 pages × 20 each)
 4. Deduplication via place_id
     Avoids counting the same clinic multiple times when it appears in overlapping search circles
+
 OUTPUT file:
 1. VP_GM.csv that contain all operational practices
 2. VP_GM_dedup.csv contain all closed practices
+--------------------
+### GoogleTextSearch_city.py
+====================================================
+
+Overview:
+This script use Google Map API to extract veterinary practices in any country using Text Search with a searching query "veterinarian in {city}, {country}". Each city has a limit 3 pages results (60 results in maximum).
+1. Page 1: always search, if page 1 has less than 20 results, stop searching for this city
+2. Page 2: conditional, if page 2 has less than 20 results or has 80% duplicated results, stop searching for page 3
+3. Page 3: conditional, only when conditions in page 1 and 2 fulfilled
+
+OUTPUT file:
+1. VP_GM.csv that contain all operational practices
+2. VP_GM_CLOSED.csv contain all closed practices
+--------------------
+### GoogleTextSearch_grid.py
+====================================================
+
+Overview:
+This script use Google Map API to extract veterinary practices in any country using Text Search with a searching query "veterinarian" in grids made by shapefile of each country. Each grid has a limit 3 pages results (60 results in maximum).
+1. Page 1: always search, if page 1 has less than 20 results, stop searching for this grid
+2. Page 2: conditional, if page 2 has less than 20 results or has 80% duplicated results, stop searching for page 3
+3. Page 3: conditional, only when conditions in page 1 and 2 fulfilled
+
+OUTPUT file:
+1. VP_GM.csv that contain all operational practices
+2. VP_GM_CLOSED.csv contain all closed practices
 --------------------
 ### OSM_PlaceSearch.py
 ====================================================
@@ -38,6 +65,24 @@ This script use OpenStreetMap to extract veterinary practices in any country
 4. Supports progress saving and resuming
 5. Works with any country shapefile
 6. Rows with both empty name and address are deleted
+
 OUTPUT file:
 1. progress.csv 
 2. VP_OSM.csv
+--------------------
+### OSM_pbf.py
+====================================================
+
+Overview:
+This script use OpenStreetMap to extract veterinary practices in any country, the data is stored as a pbf file that can be downloaded from (Geofabrik)[https://download.geofabrik.de/]
+1. Either download files for each country, or for continent and separate each country using the shapefile of their boundaries
+2. Only extract data using 'amenity=veterinary'
+
+OUTPUT file:
+1. VP_OSM.csv
+--------------------
+### address_fill.py
+====================================================
+
+Overview:
+reverse the geocoding process, for those only have latitude and longitude, using OpenStreetMap reverse tool to fill the text version address
