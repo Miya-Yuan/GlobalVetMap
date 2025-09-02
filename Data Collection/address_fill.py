@@ -5,7 +5,8 @@ import os
 
 # === CONFIGURATION ===
 BASE_DIR = r"C:\Users\myuan\Desktop\VetMap_Data"   # root folder with ISO subfolders
-USER_AGENT = "MyGeocoderScript/1.0 (Email Address)"  # required by Nominatim
+load_dotenv()
+USER_AGENT = os.getenv("OSM_USER_AGENT")  # required by Nominatim
 SLEEP_SECONDS = 1  # Nominatim limit = 1 request/sec
 
 # === REVERSE GEOCODING ===
@@ -64,4 +65,5 @@ def process_all():
 
 if __name__ == "__main__":
     process_all()
+
 
