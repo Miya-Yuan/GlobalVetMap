@@ -11,8 +11,10 @@ What it does:
 4. Fills missing columns with empty strings ("").
 5. Concatenates all cleaned files into one.
 6. Drops duplicates based on the "Name" column.
+
 INPUT files:
 1. vet practices csv files from national website, phonebook and OSM
+
 OUTPUT file:
 1. merged_output.csv
 ----------------------
@@ -43,6 +45,7 @@ INPUT files:
 1. merged_output.csv from 1_Merge_File.py
 2. vet practice csv files extracted from Google Map (both open and closed practices)
 3. nonclinic_keywords.csv
+
 OUTPUT file:
 1. VP_text_matched.csv
 2. VP_geocoded.csv
@@ -58,8 +61,10 @@ What it does:
 1. Searching the practice's name + address on Google. Skip rows with missing names and already-filled website fields
 2. Collect the first URL on Google search result page. Retries up to 3 times per row if an error occurs, use Bing as a fallback if Google is blocked or failed. Blacklisted URLs stored in blacklist_config.py are excluded. Any URL link that is not starting with http or https is excluded.
 3. Writing the resolved URL back to the dataset
+
 INPUT file:
 1. VP_cleaned.csv from 2_Name_Match.py
+
 OUTPUT file:
 2. VP_website_filled.csv
 ----------------------
@@ -78,6 +83,7 @@ What it does:
 	b. Otherwise, searches homepage text for animal category keywords. If not found, it searches service-related pages linked from the homepage using service-related anchor text. If animal types are detected, specialization is 		updated
 3. Service page scraping: automatically follows internal links to service-related pages when homepage analysis in inconclusive
 4. Splits final results into two CSVs: vet_or_uncertain and non_vet
+
 INPUT file:
 1. VP_website_filled.csv from 3_Web_Finding.py
 2. vet_keywords.csv
@@ -85,6 +91,7 @@ INPUT file:
 4. nonclinic_keywords.csv
 5. service_config.py
 6. cookie_config.py
+
 OUTPUT file:
 1. VP_filtered_vet_or_uncertain.csv
 2. VP_filtered_not_vet.csv
@@ -99,9 +106,11 @@ What it does:
 1. Team webpage finding: use keywords and blacklist keywords from team_config to detect possible team webpage and the team profiles of the practice website.
 2. Team webpage extraction: convert the HTML of the team and profile webpages to text file, if text file cannot be converted, take screenshot of the team page found.
 3. Save the text file and image file in the same folder, seperate the large text files that have more than 100,000 characters in another folder for debugging.
+
 INPUT file:
 1. VP_filtered.csv
 2. team_config.py
+
 OUTPUT file:
 1. VP_text_image
 2. VP_text_large
@@ -115,12 +124,14 @@ This Python script extract clinic and specialization information (animal species
 What it does:
 1. Veterinary detection: reprocess the rows that marked as "uncertain" in the step 4.
 2. Animal species detection: reprocess the rows that Specialization column has no valid value.
+
 INPUT file:
 1. VP_filtered.csv
 2. VP_text_image
 3. animal_keywords.csv
 4. vet_keywords.csv
 5. nonclinic_keywords.csv
+
 OUTPUT file:
 1. VP_filtered_team.csv
 ----------------------
@@ -132,8 +143,10 @@ This Python script extract text from image using OpenAI API.
 
 What it does:
 Detect image file from the folder from step 5, and extract the text inside the image using OCR.
+
 INPUT file:
 1. VP_text_image
+
 OUTPUT file:
 1. VP_text_image
 ----------------------
@@ -146,9 +159,11 @@ This Python script extract team information from text file using OpenAI API.
 What it does:
 1. Extract names and roles of the employees from the practices website text file from the folder saved from step 5, save the json files in the cache folder.
 2. Extract team information from the json files, and count the number of female doctor (FD), male doctor (MD), female non-doctor (FND) and male non-doctor (MND).
+
 INPUT file:
 1. VP_text_image
 2. VP_filtered_team.csv
+
 OUTPUT file:
 1. team_cache
 2. VP_team.csv
@@ -162,10 +177,12 @@ This Python script reprocess the extraction of team information from json file s
 What it does:
 1. Extract team information from the json files, and count the number of female doctor (FD), male doctor (MD), female non-doctor (FND) and male non-doctor (MND) for those failed in the first try.
 2. Copy those failed text in another folder for debugging.
+
 INPUT file:
 1. VP_text_image
 2. VP_team.csv
 3. team_cache
+
 OUTPUT file:
 1. Failed_text
 ----------------------
