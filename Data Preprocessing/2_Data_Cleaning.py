@@ -32,7 +32,7 @@ DEDUPED_OUTPUT_PATH = os.path.join(BASE_DIR, "VP_cleaned.csv")
 # --- VARIABLES ---
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY_1")
-USER_AGENT = "MyGeocoderScript/1.0 (Email Address)"
+USER_AGENT = os.getenv("OSM_USER_AGENT")
 SAVE_INTERVAL = 10
 DISTANCE_THRESHOLD_METERS = 50
 EARTH_RADIUS_METERS = 6371000
@@ -327,5 +327,6 @@ def vp_dedup():
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
     vp_dedup()
+
 
 
