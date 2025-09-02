@@ -30,7 +30,8 @@ cleaned_website_csv = os.path.join(BASE_DIR, "merged_output_cleaned.csv")
 GEOCODING_OUTPUT_PATH = os.path.join(BASE_DIR, "VP_geocoded.csv")
 DEDUPED_OUTPUT_PATH = os.path.join(BASE_DIR, "VP_cleaned.csv")
 # --- VARIABLES ---
-GOOGLE_API_KEY = 'API key'
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY_1")
 USER_AGENT = "MyGeocoderScript/1.0 (Email Address)"
 SAVE_INTERVAL = 10
 DISTANCE_THRESHOLD_METERS = 50
@@ -326,4 +327,5 @@ def vp_dedup():
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
     vp_dedup()
+
 
