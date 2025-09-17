@@ -78,14 +78,16 @@ Overview:
 This Python script automates the identification and classification of veterinary practice websites. It determines whether a site belongs to a veterinary clinic and, if so, detects the animal species treated (e.g., small animals, large animals, horses). It also handles multilingual cookie consent banners and supports scraping both the homepage and service-related subpages for improved accuracy.
 
 What it does:
-1. Veterinary detection: detects if a website is a veterinary clinic (yes / no / uncertain) using multilingual veterinary-related keywords 
+1. Veterinary detection: detects if a website is a veterinary clinic (yes / no / uncertain) using multilingual veterinary-related keywords
+
 	a. If the website field is empty or invalid, the row is marked as Clinic = uncertain
+
 	b. If fetching the initial URL fails or no vet keywords are found: extract the root homepage, reattempt the fetch and vet keywords search using the normalized homepage. If successful, update the website column in the row
-2. Animal specialization extraction: identifies animal species treated (small animals, large animals, horses) using fuzzy matching against language-specific keyword sets
+3. Animal specialization extraction: identifies animal species treated (small animals, large animals, horses) using fuzzy matching against language-specific keyword sets
 	a. If specialization is already filled, no further detection is done
 	b. Otherwise, searches homepage text for animal category keywords. If not found, it searches service-related pages linked from the homepage using service-related anchor text. If animal types are detected, specialization is 		updated
-3. Service page scraping: automatically follows internal links to service-related pages when homepage analysis in inconclusive
-4. Splits final results into two CSVs: vet_or_uncertain and non_vet
+4. Service page scraping: automatically follows internal links to service-related pages when homepage analysis in inconclusive
+5. Splits final results into two CSVs: vet_or_uncertain and non_vet
 
 INPUT file:
 1. VP_website_filled.csv from 3_Web_Finding.py
