@@ -47,9 +47,11 @@ INPUT files:
 3. nonclinic_keywords.csv
 
 OUTPUT file:
-1. VP_text_matched.csv
-2. VP_geocoded.csv
-3. VP_cleaned.csv
+1. VP_GM_cleaned.csv: cleaned version of GM data, with normalized "Website" column, deduplicated with DBSCAN,removed rows containing non-clinic keywords in "Name"
+2. merged_output_cleaned.csv: cleaned version of website scrape file + OSM data, URL normalization and remove rows containing non-clinic keywords in "Name"
+3. VP_text_matched.csv: fuzzy text matching between cleamed version of merged file and Google data by name+address similarity, closed clinic removed
+4. VP_geocoded.csv: latitude and longitude filled by geocoding
+5. VP_cleaned.csv: border filtering, DBSCAN distance dediplication
 ----------------------
 ### 3_Web_Finding.py
 =================================
