@@ -14,21 +14,24 @@ from shapely.geometry import Point
 from sklearn.cluster import DBSCAN
 
 # === CONFIGURATION ===
-BASE_DIR = "C:/Users/myuan/Desktop/CHE"
+BASE_DIR = "C:/Users/myuan/Desktop/VetMap_Data"
+COUNTRY_DIR = "CHE"
 KEYWORD_DIR = "C:/Users/myuan/Desktop/VetMap/Keyword"
 SHP_DIR = "C:/Users/myuan/Desktop/Data/shapefile/country"
 # --- INPUT FILES ---
 website_csv = os.path.join(BASE_DIR, "merged_output.csv")
-google_csv = os.path.join(BASE_DIR, "GM/CHE_VP_GM.csv")
-closed_csv = os.path.join(BASE_DIR, "GM/CHE_VP_GM_dedup.csv")
+google_csv = os.path.join(BASE_DIR, COUNTRY_DIR, f"GM/{COUNTRY_DIR}_VP_GM.csv")
+closed_csv = os.path.join(BASE_DIR, COUNTRY_DIR, f"GM/{COUNTRY_DIR}_VP_GM_dedup.csv")
 bad_words_csv = os.path.join(KEYWORD_DIR, "nonclinic_keywords.csv")
-shapefile_path = os.path.join(SHP_DIR, "CHE/CHE1_nr.shp")
+shapefile_path = os.path.join(SHP_DIR, COUNTRY_DIR, f"{COUNTRY_DIR}1_nr.shp")
 # --- OUTPUT FILES ---
-text_matched_csv = os.path.join(BASE_DIR, "VP_text_matched.csv")
-cleaned_google_csv = os.path.join(BASE_DIR, "GM/CHE_VP_GM_cleaned.csv")
-cleaned_website_csv = os.path.join(BASE_DIR, "merged_output_cleaned.csv")
-GEOCODING_OUTPUT_PATH = os.path.join(BASE_DIR, "VP_geocoded.csv")
-DEDUPED_OUTPUT_PATH = os.path.join(BASE_DIR, "VP_cleaned.csv")
+text_matched_csv = os.path.join(BASE_DIR, COUNTRY_DIR, "VP_text_matched.csv")
+cleaned_google_csv = os.path.join(BASE_DIR, COUNTRY_DIR, f"GM/{COUNTRY_DIR}_VP_GM_cleaned.csv")
+cleaned_website_csv = os.path.join(BASE_DIR, COUNTRY_DIR, "merged_output_cleaned.csv")
+GEOCODING_OUTPUT_PATH = os.path.join(BASE_DIR, COUNTRY_DIR, "VP_geocoded.csv")
+DEDUPED_OUTPUT_PATH = os.path.join(BASE_DIR, COUNTRY_DIR, "VP_cleaned.csv")
+NON_CLINIC_PATH = os.path.join(BASE_DIR, COUNTRY_DIR, f"{COUNTRY_DIR}_Not_Clinic.csv")
+DUPLICATES_PATH = os.path.join(BASE_DIR, COUNTRY_DIR, f"{COUNTRY_DIR}_Duplicated_Rows.csv")
 # --- VARIABLES ---
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY_1")
@@ -64,14 +67,41 @@ def keyword_match(name, keywords, threshold=85):
 # === DISTANCE DEDUPLICATION ===
 # ===================================================================
 
-# --- DEDUPLICATE USING DBSCAN CLUSTERING + SCORING ---
-def compute_score(row):
-    score = 0
-    if 'Specialization' in row and pd.notna(row['Specialization']) and str(row['Specialization']).strip().lower() != 'nan':
-        score += 2
-    if 'Website' in row and pd.notna(row['Website']) and str(row['Website']).strip():
-        score += 1
-    return score
+# --- DEDUPLICATE USING DBSCAN CLUSTERING ---
+def merge_cluster_rows(group):
+    merged = {}
+
+    # Pick the Google base row if it exists
+    if "Source" in group.columns:
+        google_rows = group[group["Source"].astype(str).str.contains("google", case=False, na=False)]
+        google_base = google_rows.iloc[0] if not google_rows.empty else None
+    else:
+        google_base = None
+
+    for col in group.columns:
+        if col in ["cluster"]:  # skip helper col
+            continue
+
+        non_nulls = group[col].dropna().astype(str).unique()
+        # --- Special handling for Specialization ---
+        if col == "Specialization":
+            if google_base is not None and pd.notna(google_base.get(col)):
+                google_val = str(google_base[col]).strip()
+                # concatenate Google + other values, remove duplicates
+                all_vals = set(non_nulls.tolist() + [google_val])
+                merged[col] = ", ".join(sorted(all_vals))
+            elif len(non_nulls) > 0:
+                merged[col] = ", ".join(non_nulls)
+            else:
+                merged[col] = None
+            continue
+        # --- Default for all other columns ---
+        if google_base is not None and pd.notna(google_base.get(col)) and str(google_base[col]).strip().lower() not in ["nan", "none", "null", ""]:
+            merged[col] = google_base[col]
+        else:
+            merged[col] = non_nulls[0] if len(non_nulls) > 0 else None
+
+    return pd.Series(merged)
 
 def deduplicate_with_dbscan(df):
     coords_rad = np.radians(df[['Latitude', 'Longitude']].values)
@@ -82,24 +112,36 @@ def deduplicate_with_dbscan(df):
     ).fit(coords_rad)
 
     df['cluster'] = db.labels_
-    df['score'] = df.apply(compute_score, axis=1)
-
+    # --- Save duplicates ---
+    cluster_counts = df['cluster'].value_counts()
+    duplicate_clusters = cluster_counts[cluster_counts > 1].index
+    duplicates_df = df[df['cluster'].isin(duplicate_clusters)].copy()
+    if not duplicates_df.empty:
+        duplicates_df.to_csv(DUPLICATES_PATH, index=False)
+    # --- Merge clusters with Google-first preference ---
     deduped_df = (
-        df.sort_values(by='score', ascending=False)
-          .groupby('cluster', as_index=False)
-          .first()
-          .drop(columns=['cluster', 'score'], errors='ignore')
+        df.groupby('cluster', group_keys=False, sort=False)
+          .apply(merge_cluster_rows, include_groups=False)
           .reset_index(drop=True)
     )
+
+    # Drop helper columns
+    deduped_df.drop(columns=['cluster', 'Source'], inplace=True, errors='ignore')
     return deduped_df
 
 def preprocess_google_data():
     bad_words = nonclinic_keywords
 
     google_df = pd.read_csv(google_csv, index_col=False)
+    google_df["Source"] = "Google"
     google_df = google_df.dropna(subset=[name_col, address_col, 'Latitude', 'Longitude'], how="any")
-    google_df = google_df[~google_df[name_col].apply(lambda x: keyword_match(x, bad_words))]
-    deduped_google_df = deduplicate_with_dbscan(google_df)
+    # --- Separate non-clinic rows ---
+    nonclinic_google = google_df[google_df[name_col].apply(lambda x: keyword_match(x, bad_words))]
+    clinic_google = google_df[~google_df[name_col].apply(lambda x: keyword_match(x, bad_words))]
+    # Save non-clinic rows
+    if not nonclinic_google.empty:
+        nonclinic_google.to_csv(NON_CLINIC_PATH, mode='w', index=False)  # overwrite on first write
+    deduped_google_df = deduplicate_with_dbscan(clinic_google)
     return deduped_google_df
 
 # ===================================================================
@@ -142,6 +184,7 @@ def text_match_dedup(deduped_google_df):
     bad_words = nonclinic_keywords
 
     website_df = website_df.dropna(subset=[name_col, address_col], how="all")
+    nonclinic_web = website_df[website_df[name_col].apply(lambda x: keyword_match(x, bad_words))]
     website_df = website_df[~website_df[name_col].apply(lambda x: keyword_match(x, bad_words))]
     
     # --- Clean Website URLs without dropping rows ---
@@ -197,31 +240,35 @@ def text_match_dedup(deduped_google_df):
     text_matched_df.drop_duplicates(subset=[name_col, address_col], inplace=True)
 
     # --- Remove known closed clinics ---
-    closed_df = pd.read_csv(closed_csv, index_col=False)
-    closed_df.dropna(subset=[name_col, address_col], inplace=True)
-    closed_df["combined"] = closed_df[name_col].astype(str) + " " + closed_df[address_col].astype(str)
-    closed_combined = closed_df["combined"].tolist()
+    if os.path.exists(closed_csv):
+        closed_df = pd.read_csv(closed_csv, index_col=False)
+        closed_df.dropna(subset=[name_col, address_col], inplace=True)
+        closed_df["combined"] = closed_df[name_col].astype(str) + " " + closed_df[address_col].astype(str)
+        closed_combined = closed_df["combined"].tolist()
 
-    text_matched_df["combined"] = text_matched_df[name_col].astype(str) + " " + text_matched_df[address_col].astype(str)
-    closed_addresses = closed_df[address_col].astype(str).tolist()
-    indices_to_remove = set()
+        text_matched_df["combined"] = text_matched_df[name_col].astype(str) + " " + text_matched_df[address_col].astype(str)
+        closed_addresses = closed_df[address_col].astype(str).tolist()
+        indices_to_remove = set()
 
-    for idx, row in text_matched_df.iterrows():
-        name = str(row.get(name_col, ""))
-        address = str(row.get(address_col, ""))
-        combined = f"{name} {address}"
+        for idx, row in text_matched_df.iterrows():
+            name = str(row.get(name_col, ""))
+            address = str(row.get(address_col, ""))
+            combined = f"{name} {address}"
 
-        match = process.extractOne(combined, closed_combined, scorer=fuzz.token_sort_ratio)
-        if match and match[1] >= 85:
-            indices_to_remove.add(idx)
-            continue
+            match = process.extractOne(combined, closed_combined, scorer=fuzz.token_sort_ratio)
+            if match and match[1] >= 85:
+                indices_to_remove.add(idx)
+                continue
 
-        address_match = process.extractOne(address, closed_addresses, scorer=fuzz.token_sort_ratio)
-        if address_match and address_match[1] >= 90:
-            indices_to_remove.add(idx)
+            address_match = process.extractOne(address, closed_addresses, scorer=fuzz.token_sort_ratio)
+            if address_match and address_match[1] >= 90:
+                indices_to_remove.add(idx)
 
-    text_matched_df.drop(index=indices_to_remove, inplace=True)
-    text_matched_df.drop(columns=["combined"], inplace=True, errors="ignore")
+        text_matched_df.drop(index=indices_to_remove, inplace=True)
+        text_matched_df.drop(columns=["combined"], inplace=True, errors="ignore")
+    else:
+        print(f"⚠️ Closed clinics file not found: {closed_csv}. Skipping closed-clinic removal.")
+
     text_matched_df.to_csv(text_matched_csv, index=False)
     return text_matched_df
 
@@ -270,35 +317,55 @@ def geocode_google(query, api_key):
 
 # === Main geocoding loop ===
 def geocode_dataframe(df):
+    final_path = GEOCODING_OUTPUT_PATH
+    partial_path = GEOCODING_OUTPUT_PATH.replace(".csv", "_partial.csv")
+
+    # === Resume logic ===
+    if os.path.exists(partial_path):
+        print(f"🔄 Resuming from partial save: {partial_path}")
+        df = pd.read_csv(partial_path)
+    elif os.path.exists(final_path):
+        print(f"✅ Final geocoded file already exists: {final_path}")
+        return pd.read_csv(final_path)
+
     if 'Latitude' not in df.columns:
         df['Latitude'] = None
     if 'Longitude' not in df.columns:
         df['Longitude'] = None
 
-    for idx, row in df.iterrows():
-        if pd.notna(row['Latitude']) and pd.notna(row['Longitude']):
-            continue
+     # --- Identify rows that need geocoding ---
+    rows_to_geocode = df[df['Latitude'].isna() | df['Longitude'].isna()]
+    total_to_geocode = len(rows_to_geocode)
 
+    geocoded_count = 0
+
+    for idx, row in rows_to_geocode.iterrows():
         query = build_query(row)
         if not query:
             continue
 
         lat, lon = geocode_osm(query)
-        if lat is None or lon is None:
-            print(f"🔁 Falling back to Google Maps for: {query}")
-            lat, lon = geocode_google(query, GOOGLE_API_KEY)
 
         if lat is not None and lon is not None:
             df.at[idx, 'Latitude'] = lat
             df.at[idx, 'Longitude'] = lon
 
+        geocoded_count += 1
         time.sleep(1)
 
-        if idx % SAVE_INTERVAL == 0:
-            df.to_csv(GEOCODING_OUTPUT_PATH, index=False)
+        if geocoded_count % SAVE_INTERVAL == 0:
+            percent = (geocoded_count / total_to_geocode) * 100
+            df.to_csv(partial_path, index=False)
+            print(f"💾 Progress saved ({geocoded_count}/{total_to_geocode} rows, {percent:.1f}%) → {partial_path}")
 
-    df.to_csv(GEOCODING_OUTPUT_PATH, index=False)
-    print(f"✅ Geocoded file save complete: {GEOCODING_OUTPUT_PATH}")
+    # Final save
+    df.to_csv(final_path, index=False)
+    print(f"✅ Final geocoded file saved: {final_path}")
+
+    if os.path.exists(partial_path):
+        os.remove(partial_path)
+        print(f"🗑️ Removed partial file: {partial_path}")
+
     return df
 
 # --- FILTER BY COUNTRY BORDER ---
@@ -321,12 +388,16 @@ def vp_dedup():
     df_geocoded = geocode_dataframe(df_text_matched)
     df_geo_filtered = filter_by_country_border(df_geocoded, shapefile_path)
     geo_deduped_df = deduplicate_with_dbscan(df_geo_filtered)
+    # --- Final cleanup: drop helper columns ---
+    helper_cols = ["cluster", "Source", "combined"]
+    geo_deduped_df = geo_deduped_df.drop(columns=[c for c in helper_cols if c in geo_deduped_df.columns])
+
     geo_deduped_df.to_csv(DEDUPED_OUTPUT_PATH, index=False)
     print("✅ File after distance deduplication saved.")
-
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
     vp_dedup()
+
 
 
 
