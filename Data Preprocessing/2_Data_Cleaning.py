@@ -345,7 +345,10 @@ def geocode_dataframe(df):
             continue
 
         lat, lon = geocode_osm(query)
-
+        # Fallback to Google if OSM failed
+        if (lat is None or lon is None) and GOOGLE_API_KEY:
+            lat, lon = geocode_google(query, GOOGLE_API_KEY)
+        
         if lat is not None and lon is not None:
             df.at[idx, 'Latitude'] = lat
             df.at[idx, 'Longitude'] = lon
@@ -397,6 +400,7 @@ def vp_dedup():
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
     vp_dedup()
+
 
 
 
