@@ -30,14 +30,20 @@ It uses fuzzy string matching (Levenshtein similarity = 85%) to identify similar
 What it does:
 1. Preprocess & Deduplicate Google Data: filter bad entries using fuzzy bad word list; apply spatial deduplication using DBSCAN clustering (within 50m); score entries using available metadata (Specialization and Website), keep highest scoring per cluster.
 2. Matches the combination of each website practice name and address to the most similar one in the Google Maps dataset. Remove closed practices using Google Map data that is labeled as "closed".
+   
 	a. If a match is found, keep the Google Maps record, and merges in any extra columns from the website database.
+
 	b. If no match is found, keeps the original record, regardless of which dataset it came from. Unmatched Google records are preserved with any missing field filled as blank to ensure consistency.
-3. Each row is compared against the list of known closed practices using two levels of fuzzy matching:
-	a. Primary: Match on Name + Address (threshold ≥ 85)
+4. Each row is compared against the list of known closed practices using two levels of fuzzy matching:
+	
+ 	a. Primary: Match on Name + Address (threshold ≥ 85)
+
 	b. Fallback: Match on Address only (threshold ≥ 90)
-4. Geocode remaining entries using OpenStreetMap, with Googla Maps API as fallback.
-5. Country border filtering and spatial deduplication.
+6. Geocode remaining entries using OpenStreetMap, with Googla Maps API as fallback.
+7. Country border filtering and spatial deduplication.
+   
 	a. Ensures all practices fall within the country boundary using a shapefile.
+
 	b. Runs DBSCAN again on the final dataset to eliminate last-mile spatial duplicates.
 Matching rows are excluded from the final output.
 
@@ -85,9 +91,10 @@ What it does:
 	b. If fetching the initial URL fails or no vet keywords are found: extract the root homepage, reattempt the fetch and vet keywords search using the normalized homepage. If successful, update the website column in the row
 3. Animal specialization extraction: identifies animal species treated (small animals, large animals, horses) using fuzzy matching against language-specific keyword sets
 	a. If specialization is already filled, no further detection is done
+
 	b. Otherwise, searches homepage text for animal category keywords. If not found, it searches service-related pages linked from the homepage using service-related anchor text. If animal types are detected, specialization is 		updated
-4. Service page scraping: automatically follows internal links to service-related pages when homepage analysis in inconclusive
-5. Splits final results into two CSVs: vet_or_uncertain and non_vet
+5. Service page scraping: automatically follows internal links to service-related pages when homepage analysis in inconclusive
+6. Splits final results into two CSVs: vet_or_uncertain and non_vet
 
 INPUT file:
 1. VP_website_filled.csv from 3_Web_Finding.py
