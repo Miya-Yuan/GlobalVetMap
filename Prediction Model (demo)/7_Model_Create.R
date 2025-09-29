@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------
-# 7. Model fitting with Switzerland data (Log-Gaussian Poisson regression)
+# Model fitting with Switzerland data (Log-Gaussian Poisson regression)
 #
 # Response: clinic counts per 10 × 10 km grid cell
 # Predictors: covariates stored separately in CSV (EPSG:4326 values)
