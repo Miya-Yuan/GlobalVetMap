@@ -302,7 +302,6 @@ INPUT files:
 OUTPUT file:
 1. Model object: `CHE_bru_fit.rds`
 2. Fixed effects (coefficients) table: `CHE_bru_fixed_effects.csv` (quantify influence of each covariate)
-3. Model fit stats (DIC, WAIC, CPO): `CHE_bru_model_fit.csv` (access goodness of fit and compare models)
-4. Predictions per grid cell: `CHE_bru_predictions.gpkg` (expected number of clinic per grid cell, with uncertainty bounds -> mean, df, 95%CI)
-5. Spatial random effect estimates: `CHE_bru_spatial_effect.csv` (captures clustering not explained by covariates)
+3. Predictions per grid cell: `CHE_bru_predictions.gpkg` (expected number of clinic per grid cell, with uncertainty bounds -> mean, df, 95%CI)
+4. Spatial random effect estimates: `CHE_bru_spatial_effect.csv` (captures clustering not explained by covariates)
 ----------------------
