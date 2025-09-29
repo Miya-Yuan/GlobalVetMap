@@ -257,8 +257,8 @@ OUTPUT file:
 
 Overview:
 
-This step fits a **log-Gaussian Poisson** regression model with spatial random effects using the inlabru package.
-The model predicts veterinary clinic counts across a 10×10 km grid covering Switzerland.
+This script fits a **Log-Gaussian Poisson** regression model using Swiss veterinary clinic data on a 10 × 10 km grid.
+The model uses **covariates**, **spatial random effects (SPDE mesh)**, and **INLA** via inlabru to estimate the spatial intensity of veterinary clinics.
 
 What it does:
 1. Load data:
@@ -313,9 +313,8 @@ INPUT files:
 
 OUTPUT file:
 1. Model object: `CHE_inlabru_fit.rds` (fitted inlabru model for later use)
-2. GeoPackage with grid geometry and attributes: `CHE_inlabru_predictions.gpkg`
-   - `obs_count`: observed clinic count.
-   - `intensity_mean`, `intensity_sd`: predicted intensity.
-   - `pred_mean`, `pred_sd`, `pred_q025`, `pred_q975`: expected counts.
-   - `resid_raw`, `resid_pearson`: residual diagnostics.
+2. Predictions: `CHE_inlabru_predictions.gpkg` (per-cell expected counts & intensity)
+3. Residuals: `CHE_inlabru_residuals.gpkg` (raw and Pearson residuals per grid cell)
+4. Fixed effects: `CHE_inlabru_fixed_effects.csv` (regression coefficients for covariates)
+5. Spatial effects: `CHE_inlabru_spatial_effect.csv` (posterior summary of SPDE random effect)
 ----------------------
