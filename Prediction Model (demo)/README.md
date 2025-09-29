@@ -13,7 +13,7 @@ What it does:
 3. Define SPDE model: matern covariance function, alpha = 2.
 4. Save outputs.
 
-#### Model Specification:
+> Model Specification:
 The mesh approximates a **Gaussian Random Field (GRF)** using the SPDE approach with a Matern covariance function.
 Parameter used:
 1. Mesh construction:
@@ -53,7 +53,7 @@ What it does:
 4. Fit model with bru(): Poisson (family); merged Swiss grid and covariates; cell area (exposure).
 5. Save outputs.
 
-#### Model specification
+> Model specification
 
 The response variable (clinic counts) is modeled using a **Log-Gaussian Cox process** approximation via a Poisson likelihood:
 
@@ -65,8 +65,6 @@ where
 - \(y_i\) = observed number of clinics in grid cell *i*  
 - \(\lambda_i\) = intensity (expected rate per unit area)  
 - \(A_i\) = area (exposure) of grid cell *i*  
-
----
 
 The log-intensity \(\lambda_i\) is modeled through a **log-link function** with fixed effects and a spatial random effect:
 
