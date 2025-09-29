@@ -257,19 +257,31 @@ OUTPUT file:
 
 Overview:
 
-This script fits a spatial regression model to Swiss veterinary clinic data, using the inlabru/INLA framework.
-
-It combines:
-1. Poisson regression for clinic counts per 10 * 10km grid cell.
-2. Fixed effects: environmental and socio-economic covariates.
-3. Random effect: a Gaussian Random Field (GRF) estimated via the Stochastic Partial Differential Equation (SPDE) approach, to capture spatial autocorrelation.
+This step fits a **log-Gaussian Poisson** regression model with spatial random effects using the inlabru package.
+The model predicts veterinary clinic counts across a 10×10 km grid covering Switzerland.
 
 What it does:
-1. Load data: Swiss grid and covariates, merge datasets by cell_id; Ensure covariates are numeric, impute missing value with column means.
-2. Load mesh and SPDE model: import mesh and SPDE.
-3. Define inlabru components: intercept; Covariates (settlement, ca, ch, pg, sh, pop, urban, gdp, acc); SPDE random effect.
-4. Fit model with bru(): Poisson (family); merged Swiss grid and covariates; cell area (exposure).
-5. Save outputs.
+1. Load data:
+   - Swiss grid and covariates, merge datasets by cell_id.
+   - Ensure covariates are numeric.
+   - Pre-built mesh and SPDE model
+2. Preprocess:
+   - Clean duplicate `clinic_count` columns.
+   - Join covariates to grid by `cell_id`.
+   - Impute missing covariate values with mean.
+   - Add centroid coordinates (`coordx`, `coordy`) and grid cell area (`cellarea`).
+3. Model fitting:
+   - Poisson likelihood with exposure = cell area.
+   - Fixed effects: settlement, ca, ch, pg, sh, pop, urban, gdp, acc.
+   - Random effect. SPDE Gaussian Field.
+   - Fit with `bru()`.
+4. Predictions: posterior mean, sd and quantiles of:
+   - Intensity ($\lambda_i$)
+   - Expected counts ($\lambda_i \cdot A_i$)
+5. Residuals:
+   - Raw residuals: $(y_i - \hat{y}_i)$
+   - Pearson residuals: $(y_i - \hat{y}_i) / \sqrt{\hat{y}_i}$
+6. Save outputs.
 
 > Model specification
 
@@ -300,8 +312,10 @@ INPUT files:
 4. `CHE_spde_model.rds`
 
 OUTPUT file:
-1. Model object: `CHE_bru_fit.rds`
-2. Fixed effects (coefficients) table: `CHE_bru_fixed_effects.csv` (quantify influence of each covariate)
-3. Predictions per grid cell: `CHE_bru_predictions.gpkg` (expected number of clinic per grid cell, with uncertainty bounds -> mean, df, 95%CI)
-4. Spatial random effect estimates: `CHE_bru_spatial_effect.csv` (captures clustering not explained by covariates)
+1. Model object: `CHE_inlabru_fit.rds` (fitted inlabru model for later use)
+2. GeoPackage with grid geometry and attributes: `CHE_inlabru_predictions.gpkg`
+   - `obs_count`: observed clinic count.
+   - `intensity_mean`, `intensity_sd`: predicted intensity.
+   - `pred_mean`, `pred_sd`, `pred_q025`, `pred_q975`: expected counts.
+   - `resid_raw`, `resid_pearson`: residual diagnostics.
 ----------------------
