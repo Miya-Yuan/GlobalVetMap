@@ -169,6 +169,28 @@ What it does:
 6. Create a CSV summary with cluster counts and percentages.
 7. Plot and export a map of clusters.
 
+> Mathematical Formulation
+
+The **Local Moran’s I** statistic for location *i* is defined as:
+
+$$
+I_i = \frac{(x_i - \bar{x})}{m_2} \sum_j w_{ij}(x_j - \bar{x})
+$$
+
+**Where:**
+
+- \(x_i\) = value at location *i* (clinic count in cell *i*)  
+- \(\bar{x}\) = mean of \(x\) across all cells  
+- \(m_2 = \frac{1}{n} \sum_i (x_i - \bar{x})^2\) = variance term  
+- \(w_{ij}\) = spatial weight between cells *i* and *j* (Queen contiguity)  
+- \(I_i\) = local measure of spatial autocorrelation for cell *i*  
+
+Cluster interpretation (based on quadrant location in Moran scatterplot + significance test):
+- **High-High (HH):** Cell with high value surrounded by high values (hotspot)  
+- **Low-Low (LL):** Cell with low value surrounded by low values (coldspot)  
+- **High-Low (HL):** Cell with high value surrounded by low values (outlier)  
+- **Low-High (LH):** Cell with low value surrounded by high values (outlier)  
+
 INPUT files:
 1. Grid with clinic counts files, e.g.:  
   - `CHE_grid_with_clinics_EPSG3035.gpkg`  
