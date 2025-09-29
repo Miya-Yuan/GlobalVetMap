@@ -318,3 +318,32 @@ OUTPUT file:
 4. Fixed effects: `CHE_inlabru_fixed_effects.csv` (regression coefficients for covariates)
 5. Spatial effects: `CHE_inlabru_spatial_effect.csv` (posterior summary of SPDE random effect)
 ----------------------
+### Step 8: Model Validation - Residual Diagnostics (8_Model_Validation.R)
+=================================
+
+Overview:
+
+This script validates the **Log-Gaussian Poisson** regression model fitted in Step 7 (Switzerland).
+It focuses on the residual diagnostics of the fitted inlabru model.
+
+What it does:
+1. Load residuals from Step 7.
+2. Check resifual variance:
+   - If variance = 0 -> Moran's I skipped.
+   - If variance > 0 -> compute Moran's I (global and local).
+3. Compute Moran's I: Global via `moran.test()`; Local via `localmoran()`.
+4. Generate plots and save outputs.
+
+INPUT files:
+1. `CHE_inlabru_residuals.gpkg` (Switzerland output from Step 7)  
+
+OUTPUT file:
+1. Summary statistics: `CHE_inlabru_LISA_summary.csv`
+   - Global Moran's I statistic, p-value, expectatin, variance.
+   - Local cluster counts.
+   - Residual variance.
+2. Per-cell LISA results: `CHE_inlabru_LISA_clusters.gpkg`
+3. Map of LISA clusters (HH, LL, HL, LH): `CHE_inlabru_LISA_cluster.png`
+4. Moran scatterplot with quadrant labels, annotated with Global Moran's I and p-value: `CHE_inlabru_scatter_obs_vs_pred.png`
+5. Histograms: `CHE_inlabru_residual_histograms.png` (raw resifuals and Pearson residuals).
+----------------------
