@@ -14,6 +14,7 @@ What it does:
 4. Save outputs.
 
 > Model Specification:
+
 The mesh approximates a **Gaussian Random Field (GRF)** using the SPDE approach with a Matern covariance function.
 Parameter used:
 1. Mesh construction:
@@ -61,24 +62,23 @@ $$
 y_i \sim \text{Poisson}(\lambda_i \cdot A_i)
 $$
 
-where  
-- \(y_i\) = observed number of clinics in grid cell *i*  
-- \(\lambda_i\) = intensity (expected rate per unit area)  
-- \(A_i\) = area (exposure) of grid cell *i*  
-
-The log-intensity \(\lambda_i\) is modeled through a **log-link function** with fixed effects and a spatial random effect:
+with the log-link function:
 
 $$
 \log(\lambda_i) = \beta_0 
-+ \beta_1 x_{i1} + \beta_2 x_{i2} + \cdots + \beta_p x_{ip} 
-+ w(s_i)
++ \beta_1 \cdot \text{settlement}_i
++ \cdots
++ \beta_k \cdot \text{acc}_i
++ u(s_i)
 $$
 
-where  
-- \(\beta_0\) = intercept  
-- \(\beta_k\) = regression coefficient for covariate \(x_{ik}\)  
-- \(x_{i1}, \ldots, x_{ip}\) = covariates for grid cell *i* (e.g., settlement, population density, GDP, accessibility)  
-- \(w(s_i)\) = spatial random effect at location \(s_i\), modeled as a **Gaussian Random Field (GRF)** with Matérn covariance, approximated via the **SPDE mesh**
+**Where:**
+
+- \(y_i\) = observed clinic count in grid cell *i*  
+- \(A_i\) = grid cell area (exposure)  
+- \(\lambda_i\) = expected clinic intensity  
+- \(\beta\) = regression coefficients for covariates  
+- \(u(s_i)\) = spatial random effect at location \(s_i\), modeled via the SPDE mesh  
   
 INPUT files:
 1. CHE_grid_with_clinics_EPSG3035.gpkg
