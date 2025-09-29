@@ -65,13 +65,7 @@ $$
 with the log-link function:
 
 $$
-
-\log(\lambda_i) = \beta_0 
-+ \beta_1 \cdot \text{settlement}_i
-+ \cdots
-+ \beta_k \cdot \text{acc}_i
-+ u(s_i)
-
+\log(\lambda_i) = \beta_0 + \beta_1 \cdot \text{settlement}_i + \cdots + \beta_k \cdot \text{acc}_i + u(s_i)
 $$
 
 **Where:**
