@@ -135,10 +135,8 @@ The workflow ensures:
 
 INPUT files:
 1. Grid with clinic counts files, e.g.:  
-- `CHE_grid_with_clinics_EPSG3035.gpkg`  
-- `CHE_grid_with_clinics_EPSG4326.gpkg`
-- `AUT_grid_with_clinics_EPSG3035.gpkg`  
-- `AUT_grid_with_clinics_EPSG4326.gpkg`
+- `*_grid_with_clinics_EPSG3035.gpkg`  
+- `*_grid_with_clinics_EPSG4326.gpkg`
 2. Clipped raster files, e.g.:  
 - `ca_v4_CHE.tif`  
 - `ca_v4_AUT.tif`  
@@ -193,10 +191,8 @@ Cluster interpretation (based on quadrant location in Moran scatterplot + signif
 
 INPUT files:
 1. Grid with clinic counts files, e.g.:  
-- `CHE_grid_with_clinics_EPSG3035.gpkg`  
-- `CHE_grid_with_clinics_EPSG4326.gpkg`
-- `AUT_grid_with_clinics_EPSG3035.gpkg`  
-- `AUT_grid_with_clinics_EPSG4326.gpkg`
+- `*_grid_with_clinics_EPSG3035.gpkg`  
+- `*_grid_with_clinics_EPSG4326.gpkg`
 
 OUTPUT file:
 1. GeoPackage: `CHE_grid_LISA.gpkg` (grid cells + attributes). Columns include:
