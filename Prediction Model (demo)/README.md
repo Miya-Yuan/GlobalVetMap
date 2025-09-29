@@ -70,11 +70,11 @@ $$
 
 **Where:**
 
-- \(y_i\) = observed clinic count in grid cell *i*  
-- \(A_i\) = grid cell area (exposure)  
-- \(\lambda_i\) = expected clinic intensity  
-- \(\beta\) = regression coefficients for covariates  
-- \(u(s_i)\) = spatial random effect at location \(s_i\), modeled via the SPDE mesh  
+- $y_i$ = observed clinic count in grid cell *i*  
+- $A_i$ = grid cell area (exposure)  
+- $\lambda_i$ = expected clinic intensity  
+- $\beta$ = regression coefficients for covariates  
+- $u(s_i)$ = spatial random effect at location $s_i$, modeled via the SPDE mesh  
   
 INPUT files:
 1. CHE_grid_with_clinics_EPSG3035.gpkg
