@@ -18,12 +18,12 @@ What it does:
 The mesh approximates a **Gaussian Random Field (GRF)** using the SPDE approach with a Matern covariance function.
 Parameter used:
 1. Mesh construction:
-  - '''max.edge = c(20e3, 50e3)''' -> max triangule edge length inside vs outside boundary (20km vs 50km).
-  - cutoff = 5e3 -> merge nodes within 5 km.
-  - offset = c(50e3, 100e3) -> buffer outside boundary (50-100km).
+  - `max.edge = c(20e3, 50e3)` -> max triangule edge length inside vs outside boundary (20km vs 50km).
+  - `cutoff = 5e3` -> merge nodes within 5 km.
+  - `offset = c(50e3, 100e3)` -> buffer outside boundary (50-100km).
 2. SPDE priors:
-  - prior.range = c(50e3, 0.5) -> P(range < 50km) = 0.5
-  - prior.sigma = c(1, 0.01) -> P(sigma > 1) = 0.01
+  - `prior.range = c(50e3, 0.5)` -> P(range < 50km) = 0.5
+  - `prior.sigma = c(1, 0.01)` -> P(sigma > 1) = 0.01
 
 INPUT files:
 1. CHE1_nr.shp
