@@ -1,3 +1,47 @@
+### Step 6: Raster Clipping (1_Clip_Covariates.py)
+=================================
+
+Overview:
+
+This script clips global raster covariates (e.g., climate, population, GDP, accessibility) to the national boundaries of Switzerland (CHE) and Austria (AUT).  
+It ensures each raster is aligned with the study area, masked correctly, and saved as country-specific GeoTIFFs for later modeling.
+
+What it does:
+1. Load each country shapefile and merge polygons into one boundary.  
+2. For each raster:
+   - Open raster with `rioxarray`.  
+   - Mask out 0 values (set to `NoData`).  
+   - Reproject boundary shapefile to raster CRS.  
+   - Clip raster to the country boundary.  
+   - Save clipped raster as GeoTIFF in `clipped_rasters/`. 
+3. Inspect properties of each clipped raster:
+   - CRS  
+   - Resolution  
+   - Value range (min, max, mean)  
+   - Heuristic checks for pixel size (≈10 km) and log10-transformation
+5. Save outputs.
+
+INPUT files:
+1. National boundaries:
+  - `CHE1_nr.shp` (Switzerland)  
+  - `AUT1_nr.shp` (Austria)
+2. Covariate rasters (global or continental coverage):
+  - `ca_v4.tif` (cattle density)  
+  - `ch_v4.tif` (chicken density)
+  - `pg_v4.tif` (pig density)
+  - `sh_v4.tif` (sheep density)
+  - `pop_density_2015_10k.tif` (human population density)  
+  - `urban_rural_2018_10k.tif` (urban–rural classification)  
+  - `world_settlement_footprint.tif` (settlement mask)  
+  - `gdp.grd` (GDP per capita)  
+  - `acc.grd` (travel time to cities) 
+
+OUTPUT file:
+1. Clipped raster files, e.g.:  
+  - `ca_v4_CHE.tif`  
+  - `ca_v4_AUT.tif`  
+  - (same for all covariates)  
+----------------------
 ### Step 6: Mesh and SPDE Model Creation (6_Mesh_SPDE.R)
 =================================
 
@@ -26,14 +70,14 @@ Parameter used:
   - `prior.sigma = c(1, 0.01)` -> P(sigma > 1) = 0.01
 
 INPUT files:
-1. CHE1_nr.shp
+1. `CHE1_nr.shp`
 
 OUTPUT file:
-1. Triangulated mesh: CHE_mesh.rds (defines the triangulated domain for the SPDE)
-2. Triangulated mesh with nodes and triangles layers: CHE_mesh.gpkg
-3. Triangulated mesh plot for documentation: CHE_mesh.png
-4. SPDE model object: CHE_spde_model.rds (spatial random effect in Step 7)
-5. SPDE parameters for transparency: CHE_spde_params.json
+1. Triangulated mesh: `CHE_mesh.rds` (defines the triangulated domain for the SPDE)
+2. Triangulated mesh with nodes and triangles layers: `CHE_mesh.gpkg`
+3. Triangulated mesh plot for documentation: `CHE_mesh.png`
+4. SPDE model object: `CHE_spde_model.rds` (spatial random effect in Step 7)
+5. SPDE parameters for transparency: `CHE_spde_params.json`
 ----------------------
 ### Step 7: Model Fitting with inlabru (7_Model_Create.R)
 =================================
@@ -77,15 +121,15 @@ $$
 - $u(s_i)$ = spatial random effect at location $s_i$, modeled via the SPDE mesh  
   
 INPUT files:
-1. CHE_grid_with_clinics_EPSG3035.gpkg
-2. CHE_grid_with_covariates_EPSG4326.csv
-3. CHE_mesh.rds
-4. CHE_spde_model.rds
+1. `CHE_grid_with_clinics_EPSG3035.gpkg`
+2. `CHE_grid_with_covariates_EPSG4326.csv`
+3. `CHE_mesh.rds`
+4. `CHE_spde_model.rds`
 
 OUTPUT file:
-1. Model object: CHE_bru_fit.rds
-2. Fixed effects (coefficients) table: CHE_bru_fixed_effects.csv (quantify influence of each covariate)
-3. Model fit stats (DIC, WAIC, CPO): CHE_bru_model_fit.csv (access goodness of fit and compare models)
-4. Predictions per grid cell: CHE_bru_predictions.gpkg (expected number of clinic per grid cell, with uncertainty bounds -> mean, df, 95%CI)
-5. Spatial random effect estimates: CHE_bru_spatial_effect.csv (captures clustering not explained by covariates)
+1. Model object: `CHE_bru_fit.rds`
+2. Fixed effects (coefficients) table: `CHE_bru_fixed_effects.csv` (quantify influence of each covariate)
+3. Model fit stats (DIC, WAIC, CPO): `CHE_bru_model_fit.csv` (access goodness of fit and compare models)
+4. Predictions per grid cell: `CHE_bru_predictions.gpkg` (expected number of clinic per grid cell, with uncertainty bounds -> mean, df, 95%CI)
+5. Spatial random effect estimates: `CHE_bru_spatial_effect.csv` (captures clustering not explained by covariates)
 ----------------------
