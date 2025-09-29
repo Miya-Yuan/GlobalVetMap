@@ -23,24 +23,24 @@ What it does:
 
 INPUT files:
 1. National boundaries:
-  - `CHE1_nr.shp` (Switzerland)  
-  - `AUT1_nr.shp` (Austria)
+- `CHE1_nr.shp` (Switzerland)  
+- `AUT1_nr.shp` (Austria)
 2. Covariate rasters (global or continental coverage):
-  - `ca_v4.tif` (cattle density)  
-  - `ch_v4.tif` (chicken density)
-  - `pg_v4.tif` (pig density)
-  - `sh_v4.tif` (sheep density)
-  - `pop_density_2015_10k.tif` (human population density)  
-  - `urban_rural_2018_10k.tif` (urban–rural classification)  
-  - `world_settlement_footprint.tif` (settlement mask)  
-  - `gdp.grd` (GDP per capita)  
-  - `acc.grd` (travel time to cities) 
+- `ca_v4.tif` (cattle density)  
+- `ch_v4.tif` (chicken density)
+- `pg_v4.tif` (pig density)
+- `sh_v4.tif` (sheep density)
+- `pop_density_2015_10k.tif` (human population density)  
+- `urban_rural_2018_10k.tif` (urban–rural classification)  
+- `world_settlement_footprint.tif` (settlement mask)  
+- `gdp.grd` (GDP per capita)  
+- `acc.grd` (travel time to cities) 
 
 OUTPUT file:
 1. Clipped raster files, e.g.:  
-  - `ca_v4_CHE.tif`  
-  - `ca_v4_AUT.tif`  
-  - (same for all covariates)  
+- `ca_v4_CHE.tif`  
+- `ca_v4_AUT.tif`  
+- (same for all covariates)  
 ----------------------
 ### Step 2: Grid Generation (2_Grid_Making.py)
 =================================
@@ -63,15 +63,15 @@ What it does:
 
 INPUT files:
 1. National boundaries:
-  - `CHE1_nr.shp` (Switzerland)  
-  - `AUT1_nr.shp` (Austria)
+- `CHE1_nr.shp` (Switzerland)  
+- `AUT1_nr.shp` (Austria)
 
 OUTPUT file:
 1. Grid files, e.g.:  
-  - `CHE_grid_10km_EPSG3035.gpkg`  
-  - `CHE_grid_10km_EPSG4326.gpkg`
-  - `AUT_grid_10km_EPSG3035.gpkg`  
-  - `AUT_grid_10km_EPSG4326.gpkg`
+- `CHE_grid_10km_EPSG3035.gpkg`  
+- `CHE_grid_10km_EPSG4326.gpkg`
+- `AUT_grid_10km_EPSG3035.gpkg`  
+- `AUT_grid_10km_EPSG4326.gpkg`
 ----------------------
 ### Step 3: Clinic-to-Grid Assignment (3_Clinic_Count.py)
 =================================
@@ -94,18 +94,18 @@ What it does:
 
 INPUT files:
 1. Clinic location files (CSV, raw coordinates in EPSG:4326):
-   - `CHE/VP_team.csv` (Switzerland)
-   - `AUT/VP_filtered_team.csv` (Austria)
+- `CHE/VP_team.csv` (Switzerland)
+- `AUT/VP_filtered_team.csv` (Austria)
 2. Grids (GeoPackage format, already created in Step 2):
-   - `*_grid_10km_EPSG4326.gpkg`  
-   - `*_grid_10km_EPSG3035.gpkg` 
+- `*_grid_10km_EPSG4326.gpkg`  
+- `*_grid_10km_EPSG3035.gpkg` 
 
 OUTPUT file:
 1. Grid with clinic counts files, e.g.:  
-  - `CHE_grid_with_clinics_EPSG3035.gpkg`  
-  - `CHE_grid_with_clinics_EPSG4326.gpkg`
-  - `AUT_grid_with_clinics_EPSG3035.gpkg`  
-  - `AUT_grid_with_clinics_EPSG4326.gpkg`
+- `CHE_grid_with_clinics_EPSG3035.gpkg`  
+- `CHE_grid_with_clinics_EPSG4326.gpkg`
+- `AUT_grid_with_clinics_EPSG3035.gpkg`  
+- `AUT_grid_with_clinics_EPSG4326.gpkg`
 ----------------------
 ### Step 4: Grid Covariate Extraction (4_Extract_Covariates.py)
 =================================
@@ -135,19 +135,19 @@ The workflow ensures:
 
 INPUT files:
 1. Grid with clinic counts files, e.g.:  
-  - `CHE_grid_with_clinics_EPSG3035.gpkg`  
-  - `CHE_grid_with_clinics_EPSG4326.gpkg`
-  - `AUT_grid_with_clinics_EPSG3035.gpkg`  
-  - `AUT_grid_with_clinics_EPSG4326.gpkg`
+- `CHE_grid_with_clinics_EPSG3035.gpkg`  
+- `CHE_grid_with_clinics_EPSG4326.gpkg`
+- `AUT_grid_with_clinics_EPSG3035.gpkg`  
+- `AUT_grid_with_clinics_EPSG4326.gpkg`
 2. Clipped raster files, e.g.:  
-  - `ca_v4_CHE.tif`  
-  - `ca_v4_AUT.tif`  
-  - (same for all covariates) 
+- `ca_v4_CHE.tif`  
+- `ca_v4_AUT.tif`  
+- (same for all covariates) 
 
 OUTPUT file:
 1. Grid with covariates files, e.g.:   
-  - `CHE_grid_with_covariates_EPSG4326.gpkg`
-  - `AUT_grid_with_covariates_EPSG4326.gpkg`
+- `CHE_grid_with_covariates_EPSG4326.gpkg`
+- `AUT_grid_with_covariates_EPSG4326.gpkg`
 ----------------------
 ### Step 5: Spatial Autocorrelation Check: Local Moran's I (LISA) Clustering Analysis (5_Spatial_Autocorrelation.py)
 =================================
@@ -193,22 +193,22 @@ Cluster interpretation (based on quadrant location in Moran scatterplot + signif
 
 INPUT files:
 1. Grid with clinic counts files, e.g.:  
-  - `CHE_grid_with_clinics_EPSG3035.gpkg`  
-  - `CHE_grid_with_clinics_EPSG4326.gpkg`
-  - `AUT_grid_with_clinics_EPSG3035.gpkg`  
-  - `AUT_grid_with_clinics_EPSG4326.gpkg`
+- `CHE_grid_with_clinics_EPSG3035.gpkg`  
+- `CHE_grid_with_clinics_EPSG4326.gpkg`
+- `AUT_grid_with_clinics_EPSG3035.gpkg`  
+- `AUT_grid_with_clinics_EPSG4326.gpkg`
 
 OUTPUT file:
 1. GeoPackage: `CHE_grid_LISA.gpkg` (grid cells + attributes). Columns include:
-  - `clinic_count` – observed clinics per cell  
-  - `local_I` – Local Moran’s I statistic  
-  - `p_value` – significance (permutation test)  
-  - `cluster` – cluster label  
-  - `cluster_int` – numeric encoding of cluster type
+- `clinic_count` – observed clinics per cell  
+- `local_I` – Local Moran’s I statistic  
+- `p_value` – significance (permutation test)  
+- `cluster` – cluster label  
+- `cluster_int` – numeric encoding of cluster type
 2. Raster:
-   - `CHE_localMoranI.tif` – continuous Local Moran’s I  
-   - `CHE_localMoranPval.tif` – p-values  
-   - `CHE_localMoranCluster.tif` – cluster map (integer codes + color table)
+- `CHE_localMoranI.tif` – continuous Local Moran’s I  
+- `CHE_localMoranPval.tif` – p-values  
+- `CHE_localMoranCluster.tif` – cluster map (integer codes + color table)
    
    Cluster color codes:
    - **0 (gray):** Not significant  
@@ -239,12 +239,12 @@ What it does:
 The mesh approximates a **Gaussian Random Field (GRF)** using the SPDE approach with a Matern covariance function.
 Parameter used:
 1. Mesh construction:
-  - `max.edge = c(20e3, 50e3)` -> max triangule edge length inside vs outside boundary (20km vs 50km).
-  - `cutoff = 5e3` -> merge nodes within 5 km.
-  - `offset = c(50e3, 100e3)` -> buffer outside boundary (50-100km).
+   - `max.edge = c(20e3, 50e3)` -> max triangule edge length inside vs outside boundary (20km vs 50km).
+   - `cutoff = 5e3` -> merge nodes within 5 km.
+   - `offset = c(50e3, 100e3)` -> buffer outside boundary (50-100km).
 2. SPDE priors:
-  - `prior.range = c(50e3, 0.5)` -> P(range < 50km) = 0.5
-  - `prior.sigma = c(1, 0.01)` -> P(sigma > 1) = 0.01
+   - `prior.range = c(50e3, 0.5)` -> P(range < 50km) = 0.5
+   - `prior.sigma = c(1, 0.01)` -> P(sigma > 1) = 0.01
 
 INPUT files:
 1. `CHE1_nr.shp`
