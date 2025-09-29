@@ -1,4 +1,4 @@
-### Step 6: Raster Clipping (1_Clip_Covariates.py)
+### Step 1: Raster Clipping (1_Clip_Covariates.py)
 =================================
 
 Overview:
@@ -19,7 +19,7 @@ What it does:
    - Resolution  
    - Value range (min, max, mean)  
    - Heuristic checks for pixel size (≈10 km) and log10-transformation
-5. Save outputs.
+4. Save outputs.
 
 INPUT files:
 1. National boundaries:
@@ -41,6 +41,161 @@ OUTPUT file:
   - `ca_v4_CHE.tif`  
   - `ca_v4_AUT.tif`  
   - (same for all covariates)  
+----------------------
+### Step 2: Grid Generation (2_Grid_Making.py)
+=================================
+
+Overview:
+
+This script generates **10 km × 10 km spatial grids** for Switzerland (CHE) and Austria (AUT).  
+Each grid is clipped to the national boundary, assigned a unique cell ID, and saved in both **EPSG:3035 (equal-area, meters)** and **EPSG:4326 (geographic, degrees)** formats.  
+These grids are later used as the spatial framework for counting clinics and attaching covariates.
+
+What it does:
+1. Load each country’s shapefile and unify polygons into a single boundary.
+2. Reproject the boundary to **EPSG:3035** (meter-based, equal-area). 
+3. Build a rectangular grid with 10 km cell size covering the bounding box of the country.
+4. Clip the grid to the national boundary.
+5. Assign a unique ID to each cell (`CHE_1`, `CHE_2`, …, `AUT_1`, `AUT_2`, …).
+6. Save results in both CRS formats:  
+   - EPSG:3035 → for modeling (area-preserving, consistent adjacency).  
+   - EPSG:4326 → for compatibility with covariates stored in degrees.  
+
+INPUT files:
+1. National boundaries:
+  - `CHE1_nr.shp` (Switzerland)  
+  - `AUT1_nr.shp` (Austria)
+
+OUTPUT file:
+1. Grid files, e.g.:  
+  - `CHE_grid_10km_EPSG3035.gpkg`  
+  - `CHE_grid_10km_EPSG4326.gpkg`
+  - `AUT_grid_10km_EPSG3035.gpkg`  
+  - `AUT_grid_10km_EPSG4326.gpkg`
+----------------------
+### Step 3: Clinic-to-Grid Assignment (3_Clinic_Count.py)
+=================================
+
+Overview:
+
+This script assigns veterinary clinics (from CSV files) to the nearest **10 × 10 km grid cells** for Switzerland (CHE) and Austria (AUT).  
+It ensures each clinic is counted exactly once and produces gridded datasets with a new column `clinic_count`.  
+Outputs are generated in both **EPSG:4326** (degrees) and **EPSG:3035** (meters) to support later modeling workflows.  
+
+What it does:
+1. Load clinic CSV and convert to a GeoDataFrame (`Longitude`, `Latitude` → geometry). 
+2. For each CRS (EPSG:4326 and EPSG:3035):
+   - Reproject clinics to grid CRS.  
+   - Assign each clinic to the **nearest grid cell** using spatial join (`sjoin_nearest`).  
+   - Count the number of clinics per cell (`clinic_count`).  
+   - Merge counts back into the grid; cells without clinics are assigned `0`.  
+   - Verify total clinics match between CSV and gridded counts (sanity check).
+3. Save the enriched grid (with `clinic_count`) as a new GeoPackage. 
+
+INPUT files:
+1. Clinic location files (CSV, raw coordinates in EPSG:4326):
+   - `CHE/VP_team.csv` (Switzerland)
+   - `AUT/VP_filtered_team.csv` (Austria)
+2. Grids (GeoPackage format, already created in Step 2):
+   - `*_grid_10km_EPSG4326.gpkg`  
+   - `*_grid_10km_EPSG3035.gpkg` 
+
+OUTPUT file:
+1. Grid with clinic counts files, e.g.:  
+  - `CHE_grid_with_clinics_EPSG3035.gpkg`  
+  - `CHE_grid_with_clinics_EPSG4326.gpkg`
+  - `AUT_grid_with_clinics_EPSG3035.gpkg`  
+  - `AUT_grid_with_clinics_EPSG4326.gpkg`
+----------------------
+### Step 4: Grid Covariate Extraction (4_Extract_Covariates.py)
+=================================
+
+Overview:
+
+This script enriches 10 × 10 km grid cells with **covariates** derived from raster datasets (environmental, demographic, economic, and accessibility).  
+It assigns values from raster covariates to each grid cell centroid and outputs a cleaned CSV for modeling.
+
+What it does:
+1. Load the **grid with clinics** files.  
+2. Sample `wsf` raster at grid centroids → create a `settlement` mask.
+3. Keep only cells with `settlement > 0`.
+4. Recompute centroids for masked grid cells.
+5. Sample all remaining covariate rasters at centroids.
+6. Enforce proper data types:  
+   - `clinic_count`, `settlement`, `urban` → **integer**.  
+   - Continuous covariates (`ca`, `ch`, `pg`, `sh`, `pop`, `gdp`, `acc`) → **float**, rounded to 2 decimals.
+7. Quick quality check: prints min, max, mean for each covariate.
+8. Save covariate-enriched grid to **CSV** (no geometry, EPSG:4326). 
+
+The workflow ensures:
+- Veterinary clinic counts are preserved (`clinic_count`).
+- Only cells with **settlements** (from World Settlement Footprint) are retained.
+- Covariates are typed correctly (integer or float).
+- Results are exported as **CSV** (EPSG:4326, lat/long) for further modeling in R/INLA.
+
+INPUT files:
+1. Grid with clinic counts files, e.g.:  
+  - `CHE_grid_with_clinics_EPSG3035.gpkg`  
+  - `CHE_grid_with_clinics_EPSG4326.gpkg`
+  - `AUT_grid_with_clinics_EPSG3035.gpkg`  
+  - `AUT_grid_with_clinics_EPSG4326.gpkg`
+2. Clipped raster files, e.g.:  
+  - `ca_v4_CHE.tif`  
+  - `ca_v4_AUT.tif`  
+  - (same for all covariates) 
+
+OUTPUT file:
+1. Grid with covariates files, e.g.:   
+  - `CHE_grid_with_covariates_EPSG4326.gpkg`
+  - `AUT_grid_with_covariates_EPSG4326.gpkg`
+----------------------
+### Step 5: Spatial Autocorrelation Check: Local Moran's I (LISA) Clustering Analysis (5_Spatial_Autocorrelation.py)
+=================================
+
+Overview:
+
+This script detects **spatial autocorrelation clusters** of veterinary clinics across Switzerland at a 10 × 10 km grid resolution.  
+Using **Local Moran’s I (LISA)**, it identifies *hotspots* and *coldspots* of veterinary clinic presence, quantifies their significance, and exports both **vector** and **raster** outputs for visualization and modeling.
+
+What it does:
+1. Load Switzerland’s grid and ensure `clinic_count` is numeric.
+2. Construct **Queen contiguity weights** (each cell shares borders with neighbors). 
+3. Run **Local Moran’s I** using PySAL. For each grid cell:
+   - Local Moran’s I value  
+   - p-value (permutation test)  
+   - cluster type (High-High, Low-Low, High-Low, Low-High, or not significant) 
+4. Save enriched grid as GeoPackage.
+5. Export results as GeoTIFFs (10 km resolution, EPSG:3035)
+6. Create a CSV summary with cluster counts and percentages.
+7. Plot and export a map of clusters.
+
+INPUT files:
+1. Grid with clinic counts files, e.g.:  
+  - `CHE_grid_with_clinics_EPSG3035.gpkg`  
+  - `CHE_grid_with_clinics_EPSG4326.gpkg`
+  - `AUT_grid_with_clinics_EPSG3035.gpkg`  
+  - `AUT_grid_with_clinics_EPSG4326.gpkg`
+
+OUTPUT file:
+1. GeoPackage: `CHE_grid_LISA.gpkg` (grid cells + attributes). Columns include:
+  - `clinic_count` – observed clinics per cell  
+  - `local_I` – Local Moran’s I statistic  
+  - `p_value` – significance (permutation test)  
+  - `cluster` – cluster label  
+  - `cluster_int` – numeric encoding of cluster type
+2. Raster:
+   - `CHE_localMoranI.tif` – continuous Local Moran’s I  
+   - `CHE_localMoranPval.tif` – p-values  
+   - `CHE_localMoranCluster.tif` – cluster map (integer codes + color table)
+   
+   Cluster color codes:
+   - **0 (gray):** Not significant  
+   - **1 (red):** High-High  
+   - **2 (blue):** Low-Low  
+   - **3 (yellow):** High-Low  
+   - **4 (green):** Low-High  
+3. `CHE_LISA_summary.csv` – quantitative breakdown of cluster types (% of grid cells)
+4. `CHE_LISA_clusters.png` – quick visualization of clusters
 ----------------------
 ### Step 6: Mesh and SPDE Model Creation (6_Mesh_SPDE.R)
 =================================
