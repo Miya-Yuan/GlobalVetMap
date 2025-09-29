@@ -2,6 +2,7 @@
 =================================
 
 Overview:
+
 This script builds the computational structure for spatial modeling in Switzerland.
 It creates a triangular mesh and defines an **SPDE (Stochastic Partial Differential Equation)** model to represent the spatial random effect in the regression model.
 The mesh + SPDE captures spatial autocorrelation between grid cells, ensuring that unmeasured geographic clustering is properly modeled in Step 7 (regression fitting).
@@ -12,7 +13,7 @@ What it does:
 3. Define SPDE model: matern covariance function, alpha = 2.
 4. Save outputs.
 
-Model Specification:
+#### Model Specification:
 The mesh approximates a **Gaussian Random Field (GRF)** using the SPDE approach with a Matern covariance function.
 Parameter used:
 1. Mesh construction:
@@ -22,7 +23,7 @@ Parameter used:
 2. SPDE priors:
   - prior.range = c(50e3, 0.5) -> P(range < 50km) = 0.5
   - prior.sigma = c(1, 0.01) -> P(sigma > 1) = 0.01
-  - 
+
 INPUT files:
 1. CHE1_nr.shp
 
@@ -37,6 +38,7 @@ OUTPUT file:
 =================================
 
 Overview:
+
 This script fits a spatial regression model to Swiss veterinary clinic data, using the inlabru/INLA framework.
 
 It combines:
@@ -51,6 +53,35 @@ What it does:
 4. Fit model with bru(): Poisson (family); merged Swiss grid and covariates; cell area (exposure).
 5. Save outputs.
 
+#### Model specification
+
+The response variable (clinic counts) is modeled using a **Log-Gaussian Cox process** approximation via a Poisson likelihood:
+
+$$
+y_i \sim \text{Poisson}(\lambda_i \cdot A_i)
+$$
+
+where  
+- \(y_i\) = observed number of clinics in grid cell *i*  
+- \(\lambda_i\) = intensity (expected rate per unit area)  
+- \(A_i\) = area (exposure) of grid cell *i*  
+
+---
+
+The log-intensity \(\lambda_i\) is modeled through a **log-link function** with fixed effects and a spatial random effect:
+
+$$
+\log(\lambda_i) = \beta_0 
++ \beta_1 x_{i1} + \beta_2 x_{i2} + \cdots + \beta_p x_{ip} 
++ w(s_i)
+$$
+
+where  
+- \(\beta_0\) = intercept  
+- \(\beta_k\) = regression coefficient for covariate \(x_{ik}\)  
+- \(x_{i1}, \ldots, x_{ip}\) = covariates for grid cell *i* (e.g., settlement, population density, GDP, accessibility)  
+- \(w(s_i)\) = spatial random effect at location \(s_i\), modeled as a **Gaussian Random Field (GRF)** with Matérn covariance, approximated via the **SPDE mesh**
+  
 INPUT files:
 1. CHE_grid_with_clinics_EPSG3035.gpkg
 2. CHE_grid_with_covariates_EPSG4326.csv
