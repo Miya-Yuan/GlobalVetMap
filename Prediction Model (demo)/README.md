@@ -179,11 +179,11 @@ $$
 
 **Where:**
 
-- \(x_i\) = value at location *i* (clinic count in cell *i*)  
-- \(\bar{x}\) = mean of \(x\) across all cells  
-- \(m_2 = \frac{1}{n} \sum_i (x_i - \bar{x})^2\) = variance term  
-- \(w_{ij}\) = spatial weight between cells *i* and *j* (Queen contiguity)  
-- \(I_i\) = local measure of spatial autocorrelation for cell *i*  
+- $x_i$: value at location $i$ (clinic count in grid cell $i$)  
+- $\bar{x}$: mean of $x$ across all cells  
+- $m_2 = \frac{1}{n} \sum_i (x_i - \bar{x})^2$: variance term  
+- $w_{ij}$: spatial weight between cells $i$ and $j$ (Queen contiguity)  
+- $I_i$: local measure of spatial autocorrelation for cell $i$
 
 Cluster interpretation (based on quadrant location in Moran scatterplot + significance test):
 - **High-High (HH):** Cell with high value surrounded by high values (hotspot)  
