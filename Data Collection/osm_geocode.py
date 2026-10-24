@@ -1,4 +1,3 @@
-
 import pandas as pd
 import pycountry
 import sqlite3
@@ -24,7 +23,7 @@ cache_file = root_folder / "geocoding_cache.sqlite"
 
 # Nominatim requires an identifying User-Agent.
 geolocator = Nominatim(
-    user_agent="vetmap_research_geocoder/1.0 (mingyang.yuan@uzh.ch)",
+    user_agent="vetmap_research_geocoder/1.0 (enter your email here)",
     timeout=15
 )
 
