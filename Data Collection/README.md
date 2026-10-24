@@ -86,3 +86,33 @@ OUTPUT file:
 
 Overview:
 reverse the geocoding process, for those only have latitude and longitude, using OpenStreetMap reverse tool to fill the text version address
+--------------------
+### OSM_geocoding.py
+====================================================
+
+Overview: This script uses OpenStreetMap (OSM) Nominatim API to geocode veterinary practices based on their Address and Country columns, retrieving latitude and longitude coordinates (WGS84, EPSG:4326).
+
+1. Read the combined veterinary practices dataset (`vets_combined.csv`), which must contain `Address` and `Country` columns.
+2. Convert the ISO3 country code (e.g., AUT, DEU, CHE) to ISO2 (e.g., AT, DE, CH) to restrict geocoding results to the correct country.
+3. Use the `Address` column and country restriction to identify the latitude and longitude of each veterinary practice.
+4. Add `Latitude`, `Longitude`, and `Geocoding_Status` columns while preserving all original columns.
+5. Cache geocoding results in a SQLite database to avoid repeated API requests for identical addresses.
+6. Handle missing addresses, invalid country codes, unmatched addresses, and API errors.
+7. Save intermediate results every 100 records to reduce data loss if the process is interrupted.
+8. Follow the public Nominatim API usage policy, including a maximum of one request per second. The public API is suitable only for small, occasional geocoding tasks; large-scale geocoding requires an alternative service or self-hosted instance.
+
+INPUT file:
+1. `vets_combined.csv`
+
+OUTPUT files:
+1. `vets_combined_geocoded.csv` — Combined veterinary practices dataset with Latitude, Longitude, and Geocoding_Status columns.
+2. `geocoding_cache.sqlite` — Local cache storing previously geocoded addresses and coordinates.
+
+Geocoding status:
+- `matched`: Coordinates successfully retrieved.
+- `not_found`: No matching location identified.
+- `missing_address`: Address is missing.
+- `invalid_country`: Country code is invalid.
+- `error`: Geocoding request failed.
+
+Note: Successfully geocoded coordinates may represent buildings, streets, or broader geographic areas depending on address completeness and OSM data availability. Additional validation is recommended before spatial analysis.
